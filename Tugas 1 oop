@@ -1,0 +1,61 @@
+#include <iostream>
+#include <string>
+
+class Product {
+public:
+    // Properties
+    int id;
+    std::string name;
+    double price;
+    int stock;
+    std::string category;
+
+    // Constructor
+    Product(int id, std::string name, double price, int stock, std::string category) :
+        id(id), name(name), price(price), stock(stock), category(category) {}
+
+    // Methods
+    void updatePrice(double newPrice) {
+        price = newPrice;
+        std::cout << "Harga " << name << " diperbarui menjadi: " << price << std::endl;
+    }
+
+    void updateStock(int quantity) {
+        stock += quantity;
+        std::cout << "Stok " << name << " diperbarui. Stok sekarang: " << stock << std::endl;
+    }
+
+    void displayInfo() {
+        std::cout << "ID: " << id << std::endl;
+        std::cout << "Nama: " << name << std::endl;
+        std::cout << "Harga: " << price << std::endl;
+        std::cout << "Stok: " << stock << std::endl;
+        std::cout << "Kategori: " << category << std::endl;
+    }
+
+    double calculateDiscount(double discountPercentage) {
+        if (discountPercentage < 0 || discountPercentage > 100) {
+            std::cout << "Diskon tidak valid. Masukkan nilai antara 0 dan 100." << std::endl;
+            return price;
+        }
+        double discountAmount = price * (discountPercentage / 100);
+        return price - discountAmount;
+    }
+};
+
+int main() {
+    Product product1(1, "Laptop XYZ", 1200.00, 10, "Elektronik");
+
+    std::cout << "Informasi Produk:" << std::endl;
+    product1.displayInfo();
+    std::cout << std::endl;
+
+    product1.updatePrice(1100.00);
+    product1.updateStock(5);
+    std::cout << std::endl;
+
+    double discountedPrice = product1.calculateDiscount(10);
+    std::cout << "Harga setelah diskon 10%: " << discountedPrice << std::endl;
+
+    return 0;
+}
