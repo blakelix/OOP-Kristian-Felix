@@ -1,0 +1,136 @@
+#include <iostream>
+#include <vector>
+#include <iomanip>  // Untuk format Rupiah
+
+using namespace std;
+
+// Parent Class: Payment
+class Payment {
+protected:
+    int id;
+    double amount;
+    string date;
+    string status;
+public:
+    Payment(int id, double amount, string date) : id(id), amount(amount), date(date), status("Pending") {}
+
+    virtual void processPayment() = 0;
+    virtual bool validatePayment() = 0;
+    virtual void refundPayment() {
+        status = "Refund";
+        cout << "Uang sebesar Rp " << fixed << setprecision(2) << amount << " telah dikembalikan.\n";
+    }
+
+    void showDetails() {
+        cout << "\nID Transaksi: " << id
+             << "\nJumlah: Rp " << fixed << setprecision(2) << amount
+             << "\nTanggal: " << date
+             << "\nStatus: " << status << endl;
+    }
+
+    virtual ~Payment() {}
+};
+
+// Child Class: CreditCardPayment
+class CreditCardPayment : public Payment {
+private:
+    string cardNumber;
+    string expiryDate;
+    int cvv;
+public:
+    CreditCardPayment(int id, double amount, string date, string cardNumber, string expiryDate, int cvv)
+        : Payment(id, amount, date), cardNumber(cardNumber), expiryDate(expiryDate), cvv(cvv) {}
+
+    bool validatePayment() override {
+        return cardNumber.length() == 16 && cvv >= 100 && cvv <= 999;
+    }
+
+    void processPayment() override {
+        if (validatePayment()) {
+            status = "Berhasil";
+            cout << "Pembayaran Kartu Kredit sebesar Rp " << fixed << setprecision(2) << amount << " berhasil.\n";
+        } else {
+            status = "Gagal";
+            cout << "Gagal: Data Kartu Kredit tidak valid.\n";
+        }
+    }
+};
+
+// Child Class: BankTransfer
+class BankTransfer : public Payment {
+private:
+    string accountNumber;
+    string bankName;
+    string transferCode;
+public:
+    BankTransfer(int id, double amount, string date, string accountNumber, string bankName, string transferCode)
+        : Payment(id, amount, date), accountNumber(accountNumber), bankName(bankName), transferCode(transferCode) {}
+
+    bool validatePayment() override {
+        return accountNumber.length() >= 10 && transferCode.length() == 6;
+    }
+
+    void processPayment() override {
+        if (validatePayment()) {
+            status = "Berhasil";
+            cout << "Transfer Bank ke " << bankName << " sebesar Rp " << fixed << setprecision(2) << amount << " berhasil.\n";
+        } else {
+            status = "Gagal";
+            cout << "Gagal: Nomor rekening atau kode transfer tidak valid.\n";
+        }
+    }
+};
+
+// Child Class: DigitalWallet
+class DigitalWallet : public Payment {
+private:
+    string walletId;
+    string provider;
+    string phoneNumber;
+public:
+    DigitalWallet(int id, double amount, string date, string walletId, string provider, string phoneNumber)
+        : Payment(id, amount, date), walletId(walletId), provider(provider), phoneNumber(phoneNumber) {}
+
+    bool validatePayment() override {
+        return phoneNumber.length() == 10 || phoneNumber.length() == 12;
+    }
+
+    void processPayment() override {
+        if (validatePayment()) {
+            status = "Berhasil";
+            cout << "Pembayaran melalui " << provider << " sebesar Rp " << fixed << setprecision(2) << amount << " berhasil.\n";
+        } else {
+            status = "Gagal";
+            cout << "Gagal: Nomor HP tidak valid.\n";
+        }
+    }
+};
+
+// MAIN FUNCTION
+int main() {
+    vector<Payment*> payments;
+
+    // Contoh transaksi
+    payments.push_back(new CreditCardPayment(1, 250000.50, "2025-03-13", "1234567812345678", "12/27", 123));
+    payments.push_back(new BankTransfer(2, 1000000, "2025-03-14", "987654321098", "BCA", "ABC123"));
+    payments.push_back(new DigitalWallet(3, 50000, "2025-03-15", "WLT789", "GoPay", "081234567890"));
+
+    // Memproses pembayaran
+    cout << "\n--- Proses Pembayaran ---\n";
+    for (auto p : payments) {
+        p->processPayment();
+        p->showDetails();
+    }
+
+    // Melakukan Refund pada transaksi pertama (Kartu Kredit)
+    cout << "\n--- Refund Proses ---\n";
+    payments[0]->refundPayment();
+    payments[0]->showDetails();
+
+    // Menghapus objek untuk mencegah memory leak
+    for (auto p : payments) {
+        delete p;
+    }
+
+    return 0;
+}
